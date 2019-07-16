@@ -1,0 +1,25 @@
+{
+  "name": "cordova-plugin-freecharge",
+  "version": "0.1.0",
+  "description": "",
+  "cordova": {
+    "id": "cordova-plugin-freecharge",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/medley-mobile/freecharge.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/medley-mobile/freecharge/issues"
+  },
+  "homepage": "https://github.com/medley-mobile/freecharge#readme"
+}
