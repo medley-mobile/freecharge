@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-freecharge" version="0.1.0">
+   <name>freechargeplugin</name>
+   <js-module name="freechargeplugin" src="www/freechargeplugin.js">
+      <clobbers target="freechargeplugin" />
+   </js-module>
+   <platform name="android">
+      <config-file parent="/*" target="res/xml/config.xml">
+         <feature name="freechargeplugin">
+            <param name="android-package" value="cordova.plugin.freecharge.freechargeplugin" />
+         </feature>
+      </config-file>
+      <config-file parent="/*" target="AndroidManifest.xml">
+         <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+        <uses-permission android:name="android.permission.RECEIVE_SMS" />
+        <uses-permission android:name="android.permission.READ_SMS" />
+       <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+      </config-file>     
+      <config-file parent="/*" target="AndroidManifest.xml" />  
+      <framework custom="true" src="src/android/freecharge.gradle" type="gradleReference" />   
+      <source-file src="src/android/freechargeplugin.java" target-dir="src/cordova/plugin/freecharge" />
+   </platform>
+</plugin>
