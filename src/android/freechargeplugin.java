@@ -7,16 +7,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 /**
  * This class echoes a string called from JavaScript.
  */
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.multidex.MultiDex;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.widget.Toast;
 
 import java.nio.charset.Charset;
@@ -24,6 +28,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 import in.freecharge.checkout.android.FreeChargePaymentSdk;
 import in.freecharge.checkout.android.commons.FreechargeSdkEnvironment;
@@ -62,8 +67,9 @@ public class freechargeplugin extends CordovaPlugin {
           merchantId=(inputObj.get("merchantId")).toString();
           merChantKey=(inputObj.get("merChantKey")).toString();
           mode=(inputObj.get("mode")).toString();
-          Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
+         // Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
           //  this.coolMethod(message, callbackContext);
+            clearCookies(cordova.getActivity());
             this.callFreeChargePaymentService(callbackContext);
             return true;
         }
@@ -73,6 +79,9 @@ public class freechargeplugin extends CordovaPlugin {
     }
 
     private void callFreeChargePaymentService(CallbackContext callbackContext) {
+
+
+
         Random ran = new Random();
         merchanttxnId = String.valueOf((100000 + ran.nextInt(900000)));
 
@@ -91,7 +100,7 @@ public class freechargeplugin extends CordovaPlugin {
         checkoutRequestMap.put("checksum", chkSumm.toString());
         checkoutRequestMap.put("currency", "INR");
 //        checkoutRequestMap.put("customerName", customreName);
-        checkoutRequestMap.put("email", emailId.toString());
+      checkoutRequestMap.put("email", emailId.toString());
         checkoutRequestMap.put("furl", "https://www.google.com");
         checkoutRequestMap.put("merchantId", merchantId.toString());
         checkoutRequestMap.put("merchantTxnId", merchanttxnId);
@@ -104,7 +113,7 @@ public class freechargeplugin extends CordovaPlugin {
 
             @Override
             public void onTransactionFailed(HashMap<String, String> txnFailResponse) {
-                Toast.makeText(cordova.getActivity(), txnFailResponse.toString(), Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(cordova.getActivity(), txnFailResponse.toString(), Toast.LENGTH_SHORT).show();
               JSONObject resultObj = new JSONObject();
               try {
                 resultObj.put("message",  txnFailResponse.toString());
@@ -112,16 +121,18 @@ public class freechargeplugin extends CordovaPlugin {
               } catch (JSONException e) {
                 e.printStackTrace();
               }
+              clearCookies(cordova.getActivity());
               callbackContext.success(resultObj);
             }
 
             @Override
             public void onTransactionCancelled() {
-                Toast.makeText(cordova.getActivity(), "user cancelled the transaction", Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(cordova.getActivity(), "user cancelled the transaction", Toast.LENGTH_SHORT).show();
               JSONObject resultObj = new JSONObject();
               try {
                 resultObj.put("message", "You Cancelled the transaction");
                 resultObj.put("status", "cancelled");
+                clearCookies(cordova.getActivity());
               } catch (JSONException e) {
                 e.printStackTrace();
               }
@@ -130,7 +141,7 @@ public class freechargeplugin extends CordovaPlugin {
 
             @Override
             public void onTransactionSucceeded(HashMap<String, String> txnSuccessResponse) {
-                Toast.makeText(cordova.getActivity(),txnSuccessResponse.toString(), Toast.LENGTH_SHORT).show();
+               // Toast.makeText(cordova.getActivity(),txnSuccessResponse.toString(), Toast.LENGTH_SHORT).show();
                 String transactionId = txnSuccessResponse.get("txnId");
                 String  resultAmount = txnSuccessResponse.get("amount");
                 String transactionStatus = txnSuccessResponse.get("status");
@@ -140,19 +151,21 @@ public class freechargeplugin extends CordovaPlugin {
                 resultObj.put("transactionId", transactionId);
                 resultObj.put("trstatus", transactionStatus);
                 resultObj.put("status", "success");
+                  clearCookies(cordova.getContext());
               } catch (JSONException e) {
                 e.printStackTrace();
-              }
+               }
                 callbackContext.success(resultObj);
             }
 
             @Override
             public void onErrorOccurred(FreechargeSdkException sdkError) {
-                Toast.makeText(cordova.getActivity(), sdkError.toString(), Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(cordova.getActivity(), sdkError.toString(), Toast.LENGTH_SHORT).show();
               JSONObject resultObj = new JSONObject();
               try {
                 resultObj.put("message", sdkError.toString());
                 resultObj.put("status", "error");
+                clearCookies(cordova.getActivity());
               } catch (JSONException e) {
                 e.printStackTrace();
               }
@@ -164,6 +177,26 @@ public class freechargeplugin extends CordovaPlugin {
         FreeChargePaymentSdk.startSafePayment(cordova.getActivity(), checkoutRequestMap, freeChargePaymentCallback);
 
 
+    }
+    @SuppressWarnings("deprecation")
+    public static void clearCookies(Context context)
+    {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            //Log.d(C.TAG, "Using clearCookies code for API >=" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } else
+        {
+           // Log.d(C.TAG, "Using clearCookies code for API <" + String.valueOf(Build.VERSION_CODES.LOLLIPOP_MR1));
+            CookieSyncManager cookieSyncMngr=CookieSyncManager.createInstance(context);
+            cookieSyncMngr.startSync();
+            CookieManager cookieManager=CookieManager.getInstance();
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
+            cookieSyncMngr.stopSync();
+            cookieSyncMngr.sync();
+        }
     }
 
 
